@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Device Control Sliders</title>
+  <script src="{{ url_for('static', filename='socket.io.min.js') }}"></script>
+  <script>
+    const socket = io();
+
+    // デバイス情報（スライダーと値を管理）
+    let sliders = {};
+
+    socket.on('connect', () => { console.log('Connected'); });
+
+    // デバイス一覧表示（ステータス表示用）
+    socket.on('device_list', data => {
+        for (let deviceID in data) {
+            createOrUpdateSlider(deviceID, data[deviceID].status);
+        }
+    });
+
+    function createOrUpdateSlider(deviceID, status) {
+        // 既にスライダーがあるかチェック
+        let container = document.getElementById('deviceContainer');
+        let slider = document.getElementById('slider_' + deviceID);
+        let label = document.getElementById('label_' + deviceID);
+        let valueDisplay = document.getElementById('value_' + deviceID);
+
+        if (!slider) {
+            // スライダーとラベルを新規作成
+            slider = document.createElement('input');
+            slider.type = 'range';
+            slider.min = 0;
+            slider.max = 100;
+            slider.id = 'slider_' + deviceID;
+
+            label = document.createElement('div');
+            label.id = 'label_' + deviceID;
+
+            // 値表示
+            valueDisplay = document.createElement('span')
+            valueDisplay.id = 'value_' + deviceID;
+            valueDisplay.innerText = 10;
+
+            // スライダー操作時にサーバーにコマンド送信
+            slider.addEventListener('input', (e) => {
+                socket.emit('send_command', {
+                    device_id: deviceID,
+                    command: e.target.value
+                });
+                valueDisplay.innerText = e.target.value;  // スライダーの横に値表示
+            });
+
+            container.appendChild(label);
+            container.appendChild(slider);
+            container.appendChild(valueDisplay);
+            container.appendChild(document.createElement('br'));
+
+            sliders[deviceID] = {slider, valueDisplay};
+        }
+
+        // ステータス表示更新
+        label.innerText = deviceID + ' : ' + status;
+    }
+
+    function sliderChange(device_id, value){
+      // スライダー操作でコマンド送信
+      socket.emit('send_command', {device_id, command: value});
+    }
+
+    socket.on('display_value', data => {
+      let valueDisplay = document.getElementById('value_' + data.device_id);
+      valueDisplay.innerText = data.value;
+    });
+
+    setInterval(()=>socket.emit('get_devices'), 2000); // 定期的に状態取得
+  </script>
+</head>
+<body>
+  <h1>Device Control via Sliders</h1>
+
+  <div id="deviceContainer"></div>
+
+</body>
+</html>
