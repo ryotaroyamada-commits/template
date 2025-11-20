@@ -2,9 +2,9 @@
 <html>
 <head>
   <title>Device Control Sliders</title>
-  <script src="{{ url_for('static', filename='socket.io.min.js') }}"></script>
+  <script src="socket.io.min.js"></script>
   <script>
-    const socket = io();
+    const socket = io('http://zoom-host-1.local:8080');
 
     // デバイス情報（スライダーと値を管理）
     let sliders = {};
