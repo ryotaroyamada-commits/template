@@ -2,7 +2,7 @@
 <html>
 <head>
   <title>Device Control Sliders</title>
-  <script src="socket.io.min.js"></script>
+  <script src="ttp://zoom-host-1.local:8080/socket.io/socket.io.js"></script>
   <script>
     const socket = io('http://zoom-host-1.local:8080');
 
@@ -39,7 +39,7 @@
             // 値表示
             valueDisplay = document.createElement('span')
             valueDisplay.id = 'value_' + deviceID;
-            valueDisplay.innerText = 10;
+            //valueDisplay.innerText = 10;
 
             // スライダー操作時にサーバーにコマンド送信
             slider.addEventListener('input', (e) => {
